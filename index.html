@@ -3,228 +3,402 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwiftChat</title>
+<title>SwiftChat V7 - TikTok Style</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:#000;color:#fff;max-width:480px;margin:0 auto;min-height:100vh}
-header{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0;background:#000;z-index:10}
-header h1{font-size:22px} header h1 span{color:#ff3b5c}
-.tabs{display:flex;border-bottom:1px solid #222}
-.tabs button{flex:1;padding:12px;background:none;border:none;color:#aaa;font-size:15px;cursor:pointer}
-.tabs button.active{color:#fff;border-bottom:2px solid #ff3b5c}
-.card{background:#111;margin:10px;border-radius:14px;overflow:hidden;border:1px solid #222}
-.card img,.card video{width:100%;display:block;max-height:420px;object-fit:cover}
-.card-body{padding:12px}
-.btn{background:#ff3b5c;color:#fff;border:none;padding:10px 14px;border-radius:20px;cursor:pointer;width:100%;margin-top:8px;font-weight:bold}
-input,textarea{width:100%;padding:12px;margin:6px 0;background:#1a1a1a;border:1px solid #333;color:#fff;border-radius:10px;outline:none}
-.post-box{background:#111;padding:12px;margin:10px;border-radius:14px}
-.hidden{display:none}
-.user-row{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #222;cursor:pointer}
-.avatar{width:40px;height:40px;border-radius:50%;background:#ff3b5c;display:flex;align-items:center;justify-content:center;font-weight:bold}
-.msg{padding:8px 12px;border-radius:16px;margin:6px 0;max-width:80%}
-.me{background:#ff3b5c;margin-left:auto}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:#000;color:#fff;max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:60px}
+button{cursor:pointer}
+input,textarea,select{outline:none}
+.topbar{position:sticky;top:0;background:#000;z-index:20;display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 10px 8px}
+.topbar span{font-size:15px;color:#999;font-weight:600;cursor:pointer;white-space:nowrap}
+.topbar span.active{color:#fff;font-size:17px;border-bottom:3px solid #fff;padding-bottom:2px}
+.topbar .search{font-size:22px;color:#fff;margin-left:4px}
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#000;border-top:1px solid #222;display:flex;justify-content:space-around;padding:6px 0 10px;z-index:30}
+.bottomnav.white{background:#fff;border-top:1px solid #eee}
+.bottomnav.white button{color:#888}
+.bottomnav.white button.active{color:#000}
+.bottomnav button{background:none;border:none;color:#aaa;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.bottomnav button.active{color:#fff}
+.bottomnav .plus{width:44px;height:28px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.bottomnav .plus::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#25F4EE 0%,#25F4EE 33%,#fff 33%,#fff 66%,#FE2C55 66%);opacity:0.9}
+.bottomnav .plus b{position:relative;z-index:1;color:#000;font-size:20px;line-height:1}
+.badge{background:#FE2C55;color:#fff;font-size:10px;padding:1px 5px;border-radius:10px;position:absolute;top:-2px;right:6px}
+.tiktok-feed{scroll-snap-type:y mandatory;overflow-y:auto;height:calc(100vh - 110px)}
+.tiktok-card{position:relative;height:calc(100vh - 110px);scroll-snap-align:start;background:#000;overflow:hidden}
+.tiktok-card img,.tiktok-card video{width:100%;height:100%;object-fit:cover}
+.tiktok-side{position:absolute;right:10px;bottom:100px;display:flex;flex-direction:column;gap:16px;align-items:center;z-index:5}
+.tiktok-avatar{width:48px;height:48px;border-radius:50%;border:2px solid #fff;overflow:hidden;background:#333;display:flex;align-items:center;justify-content:center;font-weight:bold;position:relative}
+.tiktok-avatar img{width:100%;height:100%;object-fit:cover}
+.follow-plus{width:20px;height:20px;background:#FE2C55;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:2px solid #000}
+.tiktok-action{text-align:center;color:#fff}
+.tiktok-action .circle{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:26px}
+.tiktok-action small{font-size:12px;font-weight:600}
+.tiktok-info{position:absolute;left:12px;bottom:12px;right:80px;z-index:5;text-shadow:0 1px 6px #000}
+.tiktok-info b{font-size:16px}
+.tiktok-info p{font-size:14px;margin-top:6px;line-height:1.4}
+.music-row{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px}
+.music-disc{width:36px;height:36px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;animation:spin 4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{background:#FE2C55;color:#fff;border:none;padding:10px 14px;border-radius:6px;width:100%;margin-top:8px;font-weight:bold;font-size:15px}
+.btn-small{background:#FE2C55;color:#fff;border:none;padding:7px 16px;border-radius:20px;font-weight:bold;font-size:13px}
+.btn-outline{background:transparent;color:#fff;border:1px solid #777;padding:7px 16px;border-radius:20px;font-size:13px}
+.btn-white{background:#fff;color:#000;border:none;padding:8px 18px;border-radius:6px;font-weight:bold}
+input,textarea{width:100%;padding:12px;margin:6px 0;background:#1a1a1a;border:1px solid #333;color:#fff;border-radius:10px}
+.hidden{display:none!important}
+.stories{display:flex;gap:12px;overflow-x:auto;padding:12px 10px;background:#000}
+.story{flex-shrink:0;text-align:center;width:64px}
+.story-circle{width:58px;height:58px;border-radius:50%;border:3px solid #FE2C55;padding:2px;overflow:hidden;margin:0 auto;background:#222}
+.story-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.story-add{width:58px;height:58px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px dashed #555;margin:0 auto;color:#fff}
+.inbox-page{background:#fff;color:#000;min-height:calc(100vh - 110px)}
+.inbox-page .stories{background:#fff}
+.inbox-row{display:flex;gap:12px;padding:12px 14px;align-items:center;border-bottom:1px solid #f5f5f5;cursor:pointer}
+.inbox-avatar{width:52px;height:52px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;overflow:hidden;flex-shrink:0}
+.inbox-avatar img{width:100%;height:100%;object-fit:cover}
+.notif-dot{background:#FE2C55;color:#fff;font-size:11px;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:bold}
+.profile-page{background:#fff;color:#000;min-height:calc(100vh - 110px);padding:14px 0 0}
+.profile-avatar{width:96px;height:96px;border-radius:50%;background:#eee;margin:0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#eee;margin-top:14px}
+.profile-grid div{aspect-ratio:3/4;background:#000;position:relative;overflow:hidden}
+.profile-grid img,.profile-grid video{width:100%;height:100%;object-fit:cover}
+.profile-grid span{position:absolute;left:6px;bottom:6px;color:#fff;font-size:12px;font-weight:bold;text-shadow:0 1px 4px #000}
+.pill{background:#f1f1f1;border:none;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;color:#000}
+.user-row{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #222}
+.avatar{width:40px;height:40px;border-radius:50%;background:#FE2C55;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0}
+.msg{padding:8px 12px;border-radius:16px;margin:6px 0;max-width:80%;color:#fff}
+.me{background:#FE2C55;margin-left:auto}
 .other{background:#222}
 #auth{padding:20px}
+.admin-card{background:#111;border:1px solid #333;border-radius:12px;padding:12px;margin:10px;color:#fff}
 </style>
 </head>
 <body>
-<header><h1>Swift<span>Chat</span></h1><button id="logoutBtn">Logout</button></header>
 <div id="auth">
-  <h2 style="margin:10px 0">Welcome to SwiftChat 🔥</h2>
-  <p id="debug" style="color:yellow;font-size:12px">JS Loading...</p>
-  <p style="color:#aaa;font-size:13px;margin:5px 0">Sign up with Phone Number — No Gmail needed</p>
+  <h1 style="font-size:32px;text-align:center;margin:20px 0">Swift<span style="color:#FE2C55">Chat</span> V7</h1>
+  <p style="text-align:center;color:#aaa">Sign up with Phone Number — No Gmail needed</p>
   <input id="phone" placeholder="Phone Number e.g. 08012345678" inputmode="tel">
   <input id="email" placeholder="Email (optional)">
   <input id="password" type="password" placeholder="Password">
   <input id="username" placeholder="Username (for signup)">
   <button class="btn" id="signupBtn">Create Account with Phone</button>
   <button class="btn" style="background:#222" id="loginBtn">Login with Phone</button>
-  <p id="authMsg" style="margin-top:10px;color:#ff8fa0"></p>
+  <p id="authMsg" style="margin-top:10px;color:#ff8fa0;text-align:center"></p>
+  <button id="logoutBtn" style="display:none"></button>
 </div>
+
 <div id="app" class="hidden">
-  <div class="tabs">
-    <button class="active" data-tab="feed">Feed</button>
-    <button data-tab="reels">Reels</button>
-    <button data-tab="chat">Chat</button>
-    <button data-tab="profile">Profile</button>
+  <div class="topbar" id="topbar">
+    <span onclick="setForYou('Drama',this)">Drama</span>
+    <span onclick="setForYou('Following',this)">Following</span>
+    <span onclick="setForYou('Friends',this)">Friends</span>
+    <span class="active" onclick="setForYou('For You',this)">For You</span>
+    <span class="search" onclick="showTab('chat')">🔍</span>
   </div>
+
   <div id="feedTab">
-    <div class="post-box">
-      <textarea id="postText" placeholder="What's on your mind?"></textarea>
-      <input type="file" id="postFile" accept="image/*,video/*">
-      <button class="btn" id="postBtn">Post</button>
+    <div class="tiktok-feed" id="feed"></div>
+    <div style="padding:10px;background:#000">
+      <div class="stories" id="storiesRow">
+        <div class="story" onclick="document.getElementById('storyFile').click()"><div class="story-add">+</div><small style="color:#fff">Your Story</small><input type="file" id="storyFile" accept="image/*" style="display:none"></div>
+      </div>
+      <div style="background:#111;padding:12px;border-radius:14px;margin:6px 10px">
+        <textarea id="postText" placeholder="What's on your mind? #fyp"></textarea>
+        <input type="file" id="postFile" accept="image/*,video/*">
+        <button class="btn" id="postBtn">Post</button>
+      </div>
     </div>
-    <div id="feed"></div>
   </div>
+
   <div id="reelsTab" class="hidden">
-    <div class="post-box">
-      <input type="file" id="reelFile" accept="video/*">
-      <input id="reelCaption" placeholder="Reel caption...">
-      <button class="btn" id="reelBtn">Upload Reel</button>
-    </div>
+    <div style="padding:12px;background:#000"><input id="exploreSearch" placeholder="🔍 Search videos, users..." style="margin:0;background:#222;border-radius:20px"></div>
+    <div style="background:#000;padding:10px"><input type="file" id="reelFile" accept="video/*"><input id="reelCaption" placeholder="Reel caption #fyp..."><button class="btn" id="reelBtn">Upload Reel</button></div>
     <div id="reelsList"></div>
   </div>
+
   <div id="chatTab" class="hidden">
-    <div id="usersList"></div>
-    <div id="chatBox" class="hidden" style="padding:10px">
-      <button id="backBtn" style="background:none;color:#fff;border:none;margin-bottom:10px">← Back</button>
-      <h3 id="chatWith"></h3>
-      <div id="messages" style="min-height:250px"></div>
-      <input id="msgInput" placeholder="Type message...">
-      <button class="btn" id="sendBtn">Send</button>
+    <div class="inbox-page">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px"><b style="font-size:20px">Inbox <span style="color:#FE2C55;font-size:12px">●</span></b><span style="font-size:22px">＋</span></div>
+      <div class="stories" id="inboxStories"></div>
+      <div style="padding:0 14px"><input id="searchUser" placeholder="🔍 Search users..." style="background:#f1f1f1;color:#000;border:none;border-radius:20px"></div>
+      <div id="usersList"></div>
+      <div id="chatBox" class="hidden" style="padding:14px;background:#fff">
+        <button id="backBtn" style="background:none;border:none;font-size:16px">← Back</button>
+        <h3 id="chatWith" style="margin:10px 0"></h3>
+        <div id="messages" style="min-height:250px"></div>
+        <input id="msgInput" placeholder="Type message..." style="background:#f1f1f1;color:#000;border:none">
+        <button class="btn" id="sendBtn">Send</button>
+      </div>
     </div>
   </div>
-  <div id="profileTab" class="hidden" style="padding:16px">
-    <h2 id="profileName">My Profile</h2>
-    <p id="profileEmail" style="color:#aaa;margin:6px 0"></p>
-    <p id="profilePhone" style="color:#aaa;margin:6px 0"></p>
-    <input type="file" id="avatarFile" accept="image/*">
-    <button class="btn" id="avatarBtn">Change Avatar</button>
-    <div id="myPosts" style="margin-top:16px"></div>
+
+  <div id="profileTab" class="hidden">
+    <div class="profile-page">
+      <div style="display:flex;justify-content:space-between;padding:0 14px"><span style="font-size:20px">👤＋</span><span>🔔 <b>6</b> <span onclick="showTab('settings')" style="cursor:pointer;font-size:22px">⋮</span></span></div>
+      <div class="profile-avatar" id="profileAvatar">D</div>
+      <h2 id="profileName" style="text-align:center;margin-top:10px">daniel</h2>
+      <p style="text-align:center;color:#666" id="profileHandle">@daniel</p>
+      <div style="display:flex;justify-content:center;gap:24px;margin:12px 0;text-align:center">
+        <div><b id="followingCount" style="font-size:18px">0</b><br><small style="color:#666">Following</small></div>
+        <div><b id="followersCount" style="font-size:18px">0</b><br><small style="color:#666">Followers</small></div>
+        <div><b id="likesTotal" style="font-size:18px">0</b><br><small style="color:#666">Likes</small></div>
+      </div>
+      <p id="profileBio" style="text-align:center;font-size:14px;padding:0 20px">Just wanna have your follow and likes 🙏😊</p>
+      <p id="profilePhone" style="text-align:center;color:#666;font-size:13px;margin:6px 0"></p>
+      <p id="profileViews" style="text-align:center;color:#666;font-size:13px">👀 Total Views: <b id="totalViews">0</b></p>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:10px"><button class="pill">☁️ Offline videos</button><button class="pill">🎵 Media player</button></div>
+      <div style="display:flex;justify-content:space-around;padding:14px 0;border-bottom:1px solid #eee;font-size:22px"><span>▤</span><span>🔖</span><span>↻</span><span>♡</span><span>🔒</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8f8f8;margin:10px;border-radius:10px"><span>⊕ Upload moments to free up storage</span><button class="btn-white" style="background:#000;color:#fff;padding:8px 14px">Upload</button></div>
+      <input type="file" id="avatarFile" accept="image/*" style="margin:0 14px;width:calc(100% - 28px)">
+      <button class="btn" id="avatarBtn" style="margin:10px 14px;width:calc(100% - 28px)">Change Avatar</button>
+      <div class="profile-grid" id="myPosts"></div>
+    </div>
+  </div>
+
+  <div id="settingsTab" class="hidden" style="background:#fff;color:#000;min-height:calc(100vh - 110px)">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid #eee"><span onclick="showTab('profile')" style="font-size:22px;cursor:pointer">←</span><h2 style="font-size:20px">Settings and privacy</h2></div>
+    <div style="padding:14px;border-bottom:8px solid #f5f5f5">
+      <h3 style="margin-bottom:10px">👤 Account</h3>
+      <p style="color:#666;font-size:13px;margin-bottom:8px">Username</p><input id="setUsername" placeholder="Username" style="background:#f1f1f1;color:#000;border:none">
+      <p style="color:#666;font-size:13px;margin:8px 0">Bio</p><input id="setBio" placeholder="Bio" style="background:#f1f1f1;color:#000;border:none">
+      <p style="color:#666;font-size:13px;margin:8px 0">Phone</p><input id="setPhone" placeholder="Phone" style="background:#f1f1f1;color:#000;border:none">
+      <button class="btn" onclick="saveSettings()">Save Changes</button>
+    </div>
+    <div style="padding:14px;border-bottom:8px solid #f5f5f5">
+      <h3 style="margin-bottom:12px">🔒 Privacy</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5"><span>Private Account<br><small style="color:#666">Only followers can see your posts</small></span><input type="checkbox" id="setPrivate" style="width:50px;height:24px;accent-color:#FE2C55"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5"><span>Who can message me?</span><select id="setWhoCanMsg" style="padding:8px;border-radius:8px;border:1px solid #ddd"><option value="mutual">Mutual Follow</option><option value="everyone">Everyone</option></select></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><span>Show Followers Count</span><input type="checkbox" id="setShowFollowers" checked style="width:50px;height:24px;accent-color:#FE2C55"></div>
+    </div>
+    <div style="padding:14px;border-bottom:8px solid #f5f5f5">
+      <h3 style="margin-bottom:12px">🔔 Notifications</h3>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5"><span>Likes</span><input type="checkbox" id="notifLikes" checked style="width:50px;height:24px;accent-color:#FE2C55"></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5"><span>New Followers</span><input type="checkbox" id="notifFollows" checked style="width:50px;height:24px;accent-color:#FE2C55"></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0"><span>Comments</span><input type="checkbox" id="notifComments" checked style="width:50px;height:24px;accent-color:#FE2C55"></div>
+    </div>
+    <div style="padding:14px;border-bottom:8px solid #f5f5f5">
+      <h3 style="margin-bottom:12px">🎨 Display</h3>
+      <div style="display:flex;gap:8px"><button onclick="setTheme('dark')" style="flex:1;padding:12px;border-radius:10px;background:#000;color:#fff;border:1px solid #ddd;font-weight:bold">🌙 Dark Mode</button><button onclick="setTheme('light')" style="flex:1;padding:12px;border-radius:10px;background:#fff;color:#000;border:1px solid #ddd;font-weight:bold">☀️ Light Mode</button></div>
+      <p id="themeMsg" style="color:#666;font-size:13px;margin-top:8px;text-align:center">Dark mode = TikTok black • Light mode = TikTok white</p>
+    </div>
+    <div style="padding:14px">
+      <h3 style="margin-bottom:12px;color:#FE2C55">⚠️ Danger Zone</h3>
+      <button onclick="logoutUser()" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;background:#fff;font-weight:bold;margin-bottom:8px">Log Out</button>
+      <button onclick="deleteAccount()" style="width:100%;padding:12px;border-radius:10px;border:none;background:#FE2C55;color:#fff;font-weight:bold">Delete Account Forever</button>
+      <p style="text-align:center;color:#999;font-size:12px;margin-top:14px">SwiftChat V7 • Made by Daniel • Lagos 🇳🇬</p>
+    </div>
+  </div>
+
+  <div id="adminTab" class="hidden" style="padding:14px;background:#000;min-height:60vh">
+    <h2>👑 Admin Panel</h2>
+    <p style="color:#aaa;font-size:13px;margin:6px 0">Only you can see this.</p>
+    <div style="display:flex;gap:8px;margin:10px 0"><button class="btn-small" onclick="adminLoad('users')">Users</button><button class="btn-small" onclick="adminLoad('posts')">Posts</button><button class="btn-small" onclick="adminLoad('reels')">Reels</button></div>
+    <div id="adminStats" style="color:#aaa"></div><div id="adminList"></div>
+  </div>
+
+  <div class="bottomnav" id="bottomnav">
+    <button class="active" data-nav="feed" onclick="showTab('feed')"><span style="font-size:22px">⌂</span>Home</button>
+    <button data-nav="reels" onclick="showTab('reels')"><span style="font-size:20px">▦</span>Explore</button>
+    <button onclick="document.getElementById('reelFile').click(); showTab('reels')"><span class="plus"><b>+</b></span></button>
+    <button data-nav="chat" onclick="showTab('chat')" style="position:relative"><span style="font-size:22px">▭</span>Inbox<span class="badge">8</span></button>
+    <button data-nav="profile" onclick="showTab('profile')"><span style="font-size:22px">○</span>Me</button>
+    <button data-nav="admin" id="adminNavBtn" class="hidden" onclick="showTab('admin')"><span>👑</span>Admin</button>
   </div>
 </div>
+
+<div id="storyViewer" class="hidden" style="position:fixed;inset:0;background:#000;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center">
+  <button onclick="document.getElementById('storyViewer').classList.add('hidden')" style="position:absolute;top:14px;right:14px;background:#fff;color:#000;border:none;padding:8px 14px;border-radius:20px;font-weight:bold">✕ Close</button>
+  <img id="storyImg" style="max-width:100%;max-height:80vh;object-fit:contain"><p id="storyUser" style="margin-top:10px"></p>
+</div>
 <script>
-document.getElementById('debug').innerText = "JS is WORKING ✅ Use Phone Number";
-const SUPABASE_URL = "https://sionzaaguivjjwuifxjf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_VQKfmPtc8PAsx2Ow3BVymA_RKKMOSwX";
-let supabaseClient = null;
-try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e){ document.getElementById('authMsg').innerText = "Supabase error: " + e.message; }
-let currentUser = null;
-let chatUser = null;
-function phoneToEmail(phone){
-  let p = phone.trim().replace(/\s/g,'').replace(/^\+234/,'0').replace(/[^0-9]/g,'');
-  return p + "@swiftchat.app";
-}
+const SUPABASE_URL="https://sionzaaguivjjwuifxjf.supabase.co";
+const SUPABASE_KEY="sb_publishable_VQKfmPtc8PAsx2Ow3BVymA_RKKMOSwX";
+let supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null, chatUser=null, allUsers=[], myFollowing=new Set(), forYouFilter='For You';
+function phoneToEmail(p){let x=p.trim().replace(/\s/g,'').replace(/^\+234/,'0').replace(/[^0-9]/g,'');return x+"@swiftchat.app";}
+function isAdmin(u){return u==='daniel';}
+function fmt(n){return n>=1000?(n/1000).toFixed(1)+'K':n;}
+function setForYou(v,el){forYouFilter=v; document.querySelectorAll('.topbar span').forEach(s=>s.classList.remove('active')); el.classList.add('active'); loadFeed();}
 document.getElementById('signupBtn').addEventListener('click', async ()=>{
-  const phone=document.getElementById('phone').value.trim();
-  const emailInput=document.getElementById('email').value.trim();
-  const pass=document.getElementById('password').value;
-  const username=document.getElementById('username').value.trim();
-  if(!phone || !pass || !username) return document.getElementById('authMsg').innerText="Fill Phone, Password and Username!";
-  const fakeEmail = emailInput ? emailInput : phoneToEmail(phone);
+  const phone=document.getElementById('phone').value.trim(), emailInput=document.getElementById('email').value.trim(), pass=document.getElementById('password').value, username=document.getElementById('username').value.trim();
+  if(!phone||!pass||!username) return document.getElementById('authMsg').innerText="Fill Phone, Password and Username!";
+  const fakeEmail=emailInput?emailInput:phoneToEmail(phone);
   const {data,error}=await supabaseClient.auth.signUp({email:fakeEmail,password:pass});
   if(error) return document.getElementById('authMsg').innerText=error.message;
-  if(data.user){
-    await supabaseClient.from('profiles').insert({id:data.user.id, username, full_name:username, phone});
-    document.getElementById('authMsg').innerText="Account created with Phone! Now tap Login with Phone.";
-  }
+  if(data.user){await supabaseClient.from('profiles').insert({id:data.user.id,username,full_name:username,phone}); document.getElementById('authMsg').innerText="Account created! Now tap Login.";}
 });
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
-  const phone=document.getElementById('phone').value.trim();
-  const emailInput=document.getElementById('email').value.trim();
-  const pass=document.getElementById('password').value;
-  const fakeEmail = emailInput ? emailInput : phoneToEmail(phone);
+  const phone=document.getElementById('phone').value.trim(), emailInput=document.getElementById('email').value.trim(), pass=document.getElementById('password').value;
+  const fakeEmail=emailInput?emailInput:phoneToEmail(phone);
   const {data,error}=await supabaseClient.auth.signInWithPassword({email:fakeEmail,password:pass});
   if(error) return document.getElementById('authMsg').innerText=error.message;
-  currentUser=data.user;
-  document.getElementById('auth').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-  loadFeed(); loadReels(); loadUsers();
+  currentUser=data.user; document.getElementById('auth').classList.add('hidden'); document.getElementById('app').classList.remove('hidden');
+  const {data:me}=await supabaseClient.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(me && isAdmin(me.username)) document.getElementById('adminNavBtn').classList.remove('hidden');
+  await loadFollowing(); loadFeed(); loadReels(); loadUsers(); loadStories(); loadProfile();
 });
-document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); location.reload(); });
-document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
+async function loadFollowing(){const {data}=await supabaseClient.from('follows').select('following_id').eq('follower_id',currentUser.id); myFollowing=new Set((data||[]).map(r=>r.following_id));}
+async function toggleFollow(uid){
+  if(myFollowing.has(uid)){await supabaseClient.from('follows').delete().eq('follower_id',currentUser.id).eq('following_id',uid); myFollowing.delete(uid);}
+  else {await supabaseClient.from('follows').insert({follower_id:currentUser.id,following_id:uid}); myFollowing.add(uid);}
+  loadFeed(); loadUsers(); loadProfile();
+}
 function showTab(t){
-  ['feedTab','reelsTab','chatTab','profileTab'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  ['feedTab','reelsTab','chatTab','profileTab','adminTab','settingsTab'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   document.getElementById(t+'Tab').classList.remove('hidden');
+  document.querySelectorAll('.bottomnav button').forEach(b=>b.classList.remove('active'));
+  const navBtn=document.querySelector(`[data-nav="${t}"]`); if(navBtn) navBtn.classList.add('active');
+  const bn=document.getElementById('bottomnav'); const top=document.getElementById('topbar');
+  if(t==='chat'||t==='profile'||t==='settings'){ bn.classList.add('white'); } else { bn.classList.remove('white'); }
+  top.style.display=(t==='feed'||t==='reels')?'flex':'none';
   if(t==='feed') loadFeed();
   if(t==='reels') loadReels();
   if(t==='chat') loadUsers();
   if(t==='profile') loadProfile();
+  if(t==='admin') adminLoad('users');
+  if(t==='settings') loadSettings();
+}
+document.getElementById('storyFile').addEventListener('change', async (e)=>{ const file=e.target.files[0]; if(!file) return; const name=Date.now()+'-'+file.name; const {error}=await supabaseClient.storage.from('post-media').upload(name,file); if(error) return alert(error.message); const url=supabaseClient.storage.from('post-media').getPublicUrl(name).data.publicUrl; await supabaseClient.from('stories').insert({user_id:currentUser.id,image_url:url}); loadStories(); alert('Story posted! 🔥'); });
+async function loadStories(){
+  const {data}=await supabaseClient.from('stories').select('*, profiles(username)').order('created_at',{ascending:false}).limit(10);
+  [document.getElementById('storiesRow'), document.getElementById('inboxStories')].forEach(row=>{
+    if(!row) return; const first=row.children[0]; row.innerHTML=''; if(first) row.appendChild(first);
+    (data||[]).forEach(s=>{
+      const d=document.createElement('div'); d.className='story'; const isInbox=row.id==='inboxStories';
+      d.innerHTML=`<div class="story-circle"><img src="${s.image_url}"></div><small style="color:${isInbox?'#000':'#fff'}">${s.profiles?.username||'user'}</small>`;
+      d.onclick=()=>{document.getElementById('storyImg').src=s.image_url; document.getElementById('storyUser').innerText='@'+(s.profiles?.username||'user'); document.getElementById('storyViewer').classList.remove('hidden');};
+      row.appendChild(d);
+    });
+  });
 }
 document.getElementById('postBtn').addEventListener('click', async ()=>{
-  const text=document.getElementById('postText').value;
-  const file=document.getElementById('postFile').files[0];
-  let image_url=null, video_url=null;
-  if(file){
-    const name=Date.now()+'-'+file.name;
-    const {error}=await supabaseClient.storage.from('post-media').upload(name,file);
-    if(error) return alert(error.message);
-    image_url=supabaseClient.storage.from('post-media').getPublicUrl(name).data.publicUrl;
-    if(file.type.startsWith('video')){ video_url=image_url; image_url=null; }
-  }
-  const {error}=await supabaseClient.from('posts').insert({user_id:currentUser.id, content:text, image_url, video_url});
-  if(error) return alert(error.message);
+  const text=document.getElementById('postText').value; const file=document.getElementById('postFile').files[0]; let image_url=null, video_url=null;
+  if(file){const name=Date.now()+'-'+file.name; const {error}=await supabaseClient.storage.from('post-media').upload(name,file); if(error) return alert(error.message); image_url=supabaseClient.storage.from('post-media').getPublicUrl(name).data.publicUrl; if(file.type.startsWith('video')){video_url=image_url; image_url=null;}}
+  const {error}=await supabaseClient.from('posts').insert({user_id:currentUser.id,content:text,image_url,video_url}); if(error) return alert(error.message);
   document.getElementById('postText').value=''; loadFeed(); alert('Posted!');
 });
 async function loadFeed(){
   const {data}=await supabaseClient.from('posts').select('*, profiles(username)').order('created_at',{ascending:false});
+  let filtered=data||[];
+  if(forYouFilter==='Following') filtered=filtered.filter(p=>myFollowing.has(p.user_id));
+  if(forYouFilter==='Friends') filtered=filtered.filter(p=>myFollowing.has(p.user_id));
   const feed=document.getElementById('feed'); feed.innerHTML='';
-  (data||[]).forEach(p=>{
-    const div=document.createElement('div'); div.className='card';
-    div.innerHTML=`<div class="card-body"><b>@${p.profiles?.username||'user'}</b><p style="margin:8px 0">${p.content||''}</p></div>
-    ${p.image_url?`<img src="${p.image_url}">`:''}
-    ${p.video_url?`<video src="${p.video_url}" controls></video>`:''}
-    <div class="card-body"><button onclick="likePost('${p.id}')" style="background:#222;color:#fff;border:none;padding:8px 14px;border-radius:20px">❤️ ${p.likes_count||0}</button></div>`;
-    feed.appendChild(div);
-  });
+  if(filtered.length===0){ feed.innerHTML='<div style="padding:40px;text-align:center;color:#aaa">No videos yet.<br>Post one below or Follow someone!</div>'; return; }
+  for(const p of filtered){
+    const media=p.video_url||p.image_url||''; const isVideo=!!p.video_url;
+    const {data:comments}=await supabaseClient.from('comments').select('id').eq('post_id',p.id);
+    const commentsCount=(comments||[]).length;
+    const likes=p.likes_count||0; const reposts=p.reposts_count||0; const views=p.views_count||0;
+    if(p.user_id!==currentUser.id){ await supabaseClient.from('posts').update({views_count:views+1}).eq('id',p.id); }
+    const d=document.createElement('div'); d.className='tiktok-card';
+    d.innerHTML=`${isVideo?`<video src="${media}" autoplay muted loop playsinline onclick="this.paused?this.play():this.pause()"></video>`:`<img src="${media}">`}
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:60px;opacity:0.7;pointer-events:none">▶</div>
+    <div class="tiktok-side">
+      <div style="position:relative"><div class="tiktok-avatar">${(p.profiles?.username||'U')[0].toUpperCase()}</div>${p.user_id!==currentUser.id?`<div class="follow-plus" onclick="toggleFollow('${p.user_id}')">+</div>`:''}</div>
+      <div class="tiktok-action" onclick="likePost('${p.id}')"><div class="circle">❤️</div><small>${fmt(likes)}</small></div>
+      <div class="tiktok-action" onclick="commentPost('${p.id}')"><div class="circle">💬</div><small>${fmt(commentsCount)}</small></div>
+      <div class="tiktok-action" onclick="repostPost('${p.id}')"><div class="circle">🔁</div><small>${fmt(reposts)}</small></div>
+      <div class="tiktok-action" onclick="sharePost()"><div class="circle">👀</div><small>${fmt(views)}</small></div>
+      <div class="music-disc">🎵</div>
+    </div>
+    <div class="tiktok-info"><b>@${p.profiles?.username||'user'}</b><p>${p.content||'#fyp #goviral #mood'}<br>...See more</p><div class="music-row"><span>♪</span><span>SwiftChat • Original Audio</span></div></div>
+    <div style="position:absolute;top:80px;left:12px;background:rgba(0,0,0,0.6);padding:6px 10px;border-radius:20px;font-size:12px;z-index:5">👀 ${fmt(views)} Views • ❤️ ${fmt(likes)} Likes • 💬 ${commentsCount} • 🔁 ${reposts}</div>`;
+    feed.appendChild(d);
+  }
 }
-async function likePost(id){
-  const {data}=await supabaseClient.from('posts').select('likes_count').eq('id',id).single();
-  await supabaseClient.from('posts').update({likes_count:(data?.likes_count||0)+1}).eq('id',id);
-  loadFeed();
-}
-document.getElementById('reelBtn').addEventListener('click', async ()=>{
-  const file=document.getElementById('reelFile').files[0];
-  const caption=document.getElementById('reelCaption').value;
-  if(!file) return alert('Pick a video');
-  const name=Date.now()+'-'+file.name;
-  const {error}=await supabaseClient.storage.from('reels-media').upload(name,file);
-  if(error) return alert(error.message);
-  const url=supabaseClient.storage.from('reels-media').getPublicUrl(name).data.publicUrl;
-  await supabaseClient.from('reels').insert({user_id:currentUser.id, video_url:url, caption});
-  loadReels(); alert('Reel uploaded!');
-});
+async function likePost(id){ const {data}=await supabaseClient.from('posts').select('likes_count').eq('id',id).single(); await supabaseClient.from('posts').update({likes_count:(data?.likes_count||0)+1}).eq('id',id); loadFeed(); }
+async function repostPost(id){ const {data}=await supabaseClient.from('posts').select('reposts_count').eq('id',id).single(); await supabaseClient.from('posts').update({reposts_count:(data?.reposts_count||0)+1}).eq('id',id); alert('Reposted! 🔁'); loadFeed(); }
+async function commentPost(postId){ const text=prompt('Add a comment:'); if(!text) return; await supabaseClient.from('comments').insert({post_id:postId, user_id:currentUser.id, content:text}); alert('Comment added! 💬'); loadFeed(); }
+function sharePost(){ alert('Link copied! Share SwiftChat 🔗'); }
+document.getElementById('reelBtn').addEventListener('click', async ()=>{ const file=document.getElementById('reelFile').files[0]; const caption=document.getElementById('reelCaption').value; if(!file) return alert('Pick a video'); const name=Date.now()+'-'+file.name; const {error}=await supabaseClient.storage.from('reels-media').upload(name,file); if(error) return alert(error.message); const url=supabaseClient.storage.from('reels-media').getPublicUrl(name).data.publicUrl; await supabaseClient.from('reels').insert({user_id:currentUser.id,video_url:url,caption}); loadReels(); alert('Reel uploaded!'); });
 async function loadReels(){
   const {data}=await supabaseClient.from('reels').select('*, profiles(username)').order('created_at',{ascending:false});
   const el=document.getElementById('reelsList'); el.innerHTML='';
-  (data||[]).forEach(r=>{
-    const d=document.createElement('div'); d.className='card';
-    d.innerHTML=`<video src="${r.video_url}" controls></video><div class="card-body"><b>@${r.profiles?.username||'user'}</b><p>${r.caption||''}</p></div>`;
+  for(const r of (data||[])){
+    if(r.user_id!==currentUser.id){ await supabaseClient.from('reels').update({views_count:(r.views_count||0)+1}).eq('id',r.id); }
+    const d=document.createElement('div'); d.className='tiktok-card'; d.style.height='70vh'; d.style.margin='10px'; d.style.borderRadius='16px';
+    d.innerHTML=`<video src="${r.video_url}" controls loop playsinline></video><div class="tiktok-side"><div class="tiktok-action"><div class="circle">❤️</div><small>0</small></div><div class="tiktok-action"><div class="circle">💬</div><small>0</small></div><div class="tiktok-action"><div class="circle">🔁</div><small>0</small></div><div class="tiktok-action"><div class="circle">👀</div><small>${fmt(r.views_count||0)}</small></div></div><div class="tiktok-info"><b>@${r.profiles?.username||'user'}</b><p>${r.caption||'#fyp'}</p></div>`;
     el.appendChild(d);
-  });
+  }
 }
 async function loadUsers(){
   const {data}=await supabaseClient.from('profiles').select('*').neq('id',currentUser.id);
-  const el=document.getElementById('usersList'); el.innerHTML='<h3 style="padding:12px">Chats</h3>';
-  (data||[]).forEach(u=>{
-    const d=document.createElement('div'); d.className='user-row';
-    d.innerHTML=`<div class="avatar">${(u.username||'U')[0].toUpperCase()}</div><div><b>@${u.username}</b><br><small style="color:#aaa">${u.phone||''} • Tap to chat</small></div>`;
-    d.onclick=()=>openChat(u); el.appendChild(d);
-  });
+  allUsers=data||[]; renderUsers(allUsers);
 }
-async function openChat(u){
-  chatUser=u; document.getElementById('usersList').classList.add('hidden');
-  document.getElementById('chatBox').classList.remove('hidden');
-  document.getElementById('chatWith').innerText='@'+u.username;
-  loadMessages();
+async function renderUsers(list){
+  const el=document.getElementById('usersList'); el.innerHTML='';
+  el.innerHTML+=`<div class="inbox-row"><div class="inbox-avatar" style="background:#FE2C55;color:#fff">🔔</div><div style="flex:1"><b>Activity</b><br><small style="color:#666">Someone followed you...</small></div><span class="notif-dot">1</span></div>
+  <div class="inbox-row"><div class="inbox-avatar" style="background:#0095F6;color:#fff">👥</div><div style="flex:1"><b>New followers</b><br><small style="color:#666">Someone started following you.</small></div><span class="notif-dot">2</span></div>`;
+  for(const u of list){
+    const {data:theyFollowMe}=await supabaseClient.from('follows').select('*').eq('follower_id',u.id).eq('following_id',currentUser.id).single();
+    const {data:iFollowThem}=await supabaseClient.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',u.id).single();
+    const isMutual=!!(theyFollowMe && iFollowThem); const iFollow=!!iFollowThem; const theyFollow=!!theyFollowMe;
+    let statusText='', btn='';
+    if(isMutual){ statusText='✅ Mutual Follow • Tap to chat'; btn=`<span style="color:#25F4EE;font-weight:bold;font-size:13px">💬 Chat</span>`; }
+    else if(iFollow && !theyFollow){ statusText='You follow them • Waiting for follow back'; btn=`<span style="color:#888;font-size:12px">⏳ Waiting</span>`; }
+    else if(!iFollow && theyFollow){ statusText='They follow you • Follow back to chat'; btn=`<button class="btn-small" onclick="event.stopPropagation(); toggleFollow('${u.id}')">Follow Back</button>`; }
+    else { statusText='Not following each other yet'; btn=`<button class="btn-small" onclick="event.stopPropagation(); toggleFollow('${u.id}')">＋ Follow</button>`; }
+    const d=document.createElement('div'); d.className='inbox-row';
+    d.innerHTML=`<div class="inbox-avatar">${(u.username||'U')[0].toUpperCase()}</div><div style="flex:1"><b>${u.username}</b><br><small style="color:#666">${statusText}</small></div>${btn}`;
+    d.onclick=()=>openChat(u,isMutual); el.appendChild(d);
+  }
+}
+document.getElementById('searchUser').addEventListener('input', (e)=>{ const q=e.target.value.toLowerCase().trim(); if(!q) return renderUsers(allUsers); renderUsers(allUsers.filter(u=>(u.username||'').toLowerCase().includes(q))); });
+async function openChat(u, isMutual){
+  if(isMutual===undefined){
+    const {data:a}=await supabaseClient.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',u.id).single();
+    const {data:b}=await supabaseClient.from('follows').select('*').eq('follower_id',u.id).eq('following_id',currentUser.id).single();
+    isMutual=!!(a && b);
+  }
+  if(!isMutual){ const want=confirm(`You must follow each other before chatting with @${u.username}.\n\nTap OK to Follow them now.`); if(want) await toggleFollow(u.id); return; }
+  chatUser=u; document.getElementById('usersList').classList.add('hidden'); document.getElementById('chatBox').classList.remove('hidden'); document.getElementById('chatWith').innerText='@'+u.username+' • Mutual Follow ✅'; loadMessages();
 }
 document.getElementById('backBtn').addEventListener('click', ()=>{ document.getElementById('usersList').classList.remove('hidden'); document.getElementById('chatBox').classList.add('hidden'); });
-async function loadMessages(){
-  const {data}=await supabaseClient.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${chatUser.id}),and(sender_id.eq.${chatUser.id},receiver_id.eq.${currentUser.id})`).order('created_at',{ascending:true});
-  const el=document.getElementById('messages'); el.innerHTML='';
-  (data||[]).forEach(m=>{
-    const d=document.createElement('div'); d.className='msg '+(m.sender_id===currentUser.id?'me':'other'); d.innerText=m.content; el.appendChild(d);
-  });
-}
-document.getElementById('sendBtn').addEventListener('click', async ()=>{
-  const content=document.getElementById('msgInput').value; if(!content) return;
-  await supabaseClient.from('messages').insert({sender_id:currentUser.id, receiver_id:chatUser.id, content});
-  document.getElementById('msgInput').value=''; loadMessages();
-});
-document.getElementById('avatarBtn').addEventListener('click', async ()=>{
-  const file=document.getElementById('avatarFile').files[0]; if(!file) return alert('Pick image');
-  const name=Date.now()+'-'+file.name;
-  const {error}=await supabaseClient.storage.from('avatars').upload(name,file);
-  if(error) return alert(error.message);
-  const url=supabaseClient.storage.from('avatars').getPublicUrl(name).data.publicUrl;
-  await supabaseClient.from('profiles').update({avatar_url:url}).eq('id',currentUser.id);
-  alert('Avatar updated!'); loadProfile();
-});
+async function loadMessages(){ const {data}=await supabaseClient.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${chatUser.id}),and(sender_id.eq.${chatUser.id},receiver_id.eq.${currentUser.id})`).order('created_at',{ascending:true}); const el=document.getElementById('messages'); el.innerHTML=''; (data||[]).forEach(m=>{ const d=document.createElement('div'); d.className='msg '+(m.sender_id===currentUser.id?'me':'other'); d.innerText=m.content; el.appendChild(d); }); }
+document.getElementById('sendBtn').addEventListener('click', async ()=>{ const content=document.getElementById('msgInput').value; if(!content) return; await supabaseClient.from('messages').insert({sender_id:currentUser.id,receiver_id:chatUser.id,content}); document.getElementById('msgInput').value=''; loadMessages(); });
+document.getElementById('avatarBtn').addEventListener('click', async ()=>{ const file=document.getElementById('avatarFile').files[0]; if(!file) return alert('Pick image'); const name=Date.now()+'-'+file.name; const {error}=await supabaseClient.storage.from('avatars').upload(name,file); if(error) return alert(error.message); const url=supabaseClient.storage.from('avatars').getPublicUrl(name).data.publicUrl; await supabaseClient.from('profiles').update({avatar_url:url}).eq('id',currentUser.id); alert('Avatar updated!'); loadProfile(); });
 async function loadProfile(){
   const {data}=await supabaseClient.from('profiles').select('*').eq('id',currentUser.id).single();
-  if(data){ document.getElementById('profileName').innerText='@'+(data.username||'user'); document.getElementById('profileEmail').innerText=currentUser.email; document.getElementById('profilePhone').innerText='Phone: '+(data.phone||''); }
+  if(data){ document.getElementById('profileName').innerText=data.username; document.getElementById('profileHandle').innerText='@'+data.username; document.getElementById('profileAvatar').innerText=(data.username||'D')[0].toUpperCase(); document.getElementById('profilePhone').innerText='Phone: '+(data.phone||''); document.getElementById('profileBio').innerText=data.bio||'Just wanna have your follow and likes 🙏😊'; }
+  const {data:f1}=await supabaseClient.from('follows').select('*').eq('following_id',currentUser.id);
+  const {data:f2}=await supabaseClient.from('follows').select('*').eq('follower_id',currentUser.id);
+  document.getElementById('followersCount').innerText=(f1||[]).length;
+  document.getElementById('followingCount').innerText=(f2||[]).length;
+  const {data:myPosts}=await supabaseClient.from('posts').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  const {data:myReels}=await supabaseClient.from('reels').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  let totalLikes=0, totalViews=0; (myPosts||[]).forEach(p=>{totalLikes+=(p.likes_count||0); totalViews+=(p.views_count||0);}); (myReels||[]).forEach(r=>{totalViews+=(r.views_count||0);});
+  document.getElementById('likesTotal').innerText=totalLikes;
+  document.getElementById('totalViews').innerText=fmt(totalViews);
+  const grid=document.getElementById('myPosts'); grid.innerHTML='';
+  [...(myReels||[]), ...(myPosts||[])].forEach(item=>{ const url=item.video_url||item.image_url; if(!url) return; const isV=!!item.video_url; const div=document.createElement('div'); div.innerHTML=`${isV?`<video src="${url}" muted></video>`:`<img src="${url}">`}<span>▶ ${fmt(item.views_count||0)}</span>`; grid.appendChild(div); });
 }
+async function loadSettings(){
+  const {data}=await supabaseClient.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(data){ document.getElementById('setUsername').value=data.username||''; document.getElementById('setBio').value=data.bio||''; document.getElementById('setPhone').value=data.phone||''; document.getElementById('setPrivate').checked=data.is_private||false; }
+  document.getElementById('notifLikes').checked=localStorage.getItem('notifLikes')!=='off';
+  document.getElementById('notifFollows').checked=localStorage.getItem('notifFollows')!=='off';
+  document.getElementById('notifComments').checked=localStorage.getItem('notifComments')!=='off';
+}
+async function saveSettings(){
+  const username=document.getElementById('setUsername').value.trim(); const bio=document.getElementById('setBio').value.trim(); const phone=document.getElementById('setPhone').value.trim(); const is_private=document.getElementById('setPrivate').checked; const whoCanMsg=document.getElementById('setWhoCanMsg').value;
+  if(!username) return alert('Username cannot be empty!');
+  const {error}=await supabaseClient.from('profiles').update({username,bio,phone,is_private}).eq('id',currentUser.id); if(error) return alert(error.message);
+  localStorage.setItem('notifLikes',document.getElementById('notifLikes').checked?'on':'off');
+  localStorage.setItem('notifFollows',document.getElementById('notifFollows').checked?'on':'off');
+  localStorage.setItem('notifComments',document.getElementById('notifComments').checked?'on':'off');
+  localStorage.setItem('whoCanMsg',whoCanMsg);
+  alert('Settings saved! ✅'); loadProfile(); showTab('profile');
+}
+function setTheme(mode){ if(mode==='light'){document.body.style.background='#fff';document.body.style.color='#000';document.getElementById('themeMsg').innerText='Light Mode ON ☀️';} else {document.body.style.background='#000';document.body.style.color='#fff';document.getElementById('themeMsg').innerText='Dark Mode ON 🌙';} localStorage.setItem('theme',mode); }
+async function logoutUser(){ if(!confirm('Log out?')) return; await supabaseClient.auth.signOut(); location.reload(); }
+async function deleteAccount(){ const ok=prompt('Type DELETE to delete your account forever:'); if(ok!=='DELETE') return alert('Cancelled.'); await supabaseClient.from('profiles').delete().eq('id',currentUser.id); await supabaseClient.auth.signOut(); alert('Account deleted. Bye 😢'); location.reload(); }
+async function adminLoad(type){
+  const stats=document.getElementById('adminStats'); const list=document.getElementById('adminList'); list.innerHTML='Loading...';
+  if(type==='users'){ const {data}=await supabaseClient.from('profiles').select('*').order('username'); stats.innerText=`Total Users: ${(data||[]).length}`; list.innerHTML=(data||[]).map(u=>`<div class="admin-card"><b>@${u.username}</b><br><small>${u.phone||''}</small><br><button class="btn-small" style="margin-top:8px;background:#222" onclick="adminDelete('profiles','${u.id}')">Delete</button></div>`).join(''); }
+  if(type==='posts'){ const {data}=await supabaseClient.from('posts').select('*, profiles(username)').order('created_at',{ascending:false}); stats.innerText=`Total Posts: ${(data||[]).length}`; list.innerHTML=(data||[]).map(p=>`<div class="admin-card"><b>@${p.profiles?.username||'user'}</b> • ${p.content||''} • 👀 ${p.views_count||0} • ❤️ ${p.likes_count||0}<br><button class="btn-small" style="margin-top:8px;background:#222" onclick="adminDelete('posts','${p.id}')">Delete</button></div>`).join(''); }
+  if(type==='reels'){ const {data}=await supabaseClient.from('reels').select('*, profiles(username)').order('created_at',{ascending:false}); stats.innerText=`Total Reels: ${(data||[]).length}`; list.innerHTML=(data||[]).map(r=>`<div class="admin-card"><b>@${r.profiles?.username||'user'}</b> • ${r.caption||''} • 👀 ${r.views_count||0}<br><video src="${r.video_url}" controls style="width:100%;max-height:200px"></video><br><button class="btn-small" style="margin-top:8px;background:#222" onclick="adminDelete('reels','${r.id}')">Delete</button></div>`).join(''); }
+}
+async function adminDelete(table,id){ if(!confirm('Delete this?')) return; await supabaseClient.from(table).delete().eq('id',id); alert('Deleted!'); adminLoad(table==='profiles'?'users':table); }
 </script>
 </body>
 </html>
