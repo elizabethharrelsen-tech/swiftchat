@@ -21,7 +21,7 @@ input,textarea{width:100%;padding:12px;margin:6px 0;background:#1a1a1a;border:1p
 .post-box{background:#111;padding:12px;margin:10px;border-radius:14px}
 .hidden{display:none}
 .user-row{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #222;cursor:pointer}
-.avatar{width:40px;height:40px;border-radius:50%;background:#ff3b5c;display:flex;align-items:center;justify-content:center;font-weight:bold;object-fit:cover}
+.avatar{width:40px;height:40px;border-radius:50%;background:#ff3b5c;display:flex;align-items:center;justify-content:center;font-weight:bold}
 .msg{padding:8px 12px;border-radius:16px;margin:6px 0;max-width:80%}
 .me{background:#ff3b5c;margin-left:auto}
 .other{background:#222}
@@ -29,80 +29,72 @@ input,textarea{width:100%;padding:12px;margin:6px 0;background:#1a1a1a;border:1p
 </style>
 </head>
 <body>
-
-<header><h1>Swift<span>Chat</span></h1><button onclick="logout()" style="background:none;border:1px solid #333;color:#fff;padding:6px 12px;border-radius:20px">Logout</button></header>
-
-<!-- AUTH -->
+<header><h1>Swift<span>Chat</span></h1><button id="logoutBtn">Logout</button></header>
 <div id="auth">
   <h2 style="margin:10px 0">Welcome to SwiftChat 🔥</h2>
+  <p id="debug" style="color:yellow;font-size:12px">JS Loading...</p>
   <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
   <input id="username" placeholder="Username (for signup)">
-  <button class="btn" onclick="signUp()">Create Account</button>
-  <button class="btn" style="background:#222" onclick="signIn()">Login</button>
+  <button class="btn" id="signupBtn">Create Account</button>
+  <button class="btn" style="background:#222" id="loginBtn">Login</button>
   <p id="authMsg" style="margin-top:10px;color:#ff8fa0"></p>
 </div>
-
-<!-- APP -->
 <div id="app" class="hidden">
   <div class="tabs">
-    <button id="tabFeed" class="active" onclick="showTab('feed')">Feed</button>
-    <button id="tabReels" onclick="showTab('reels')">Reels</button>
-    <button id="tabChat" onclick="showTab('chat')">Chat</button>
-    <button onclick="showTab('profile')">Profile</button>
+    <button class="active" data-tab="feed">Feed</button>
+    <button data-tab="reels">Reels</button>
+    <button data-tab="chat">Chat</button>
+    <button data-tab="profile">Profile</button>
   </div>
-
-  <!-- FEED -->
   <div id="feedTab">
     <div class="post-box">
       <textarea id="postText" placeholder="What's on your mind?"></textarea>
       <input type="file" id="postFile" accept="image/*,video/*">
-      <button class="btn" onclick="createPost()">Post</button>
+      <button class="btn" id="postBtn">Post</button>
     </div>
     <div id="feed"></div>
   </div>
-
-  <!-- REELS -->
   <div id="reelsTab" class="hidden">
     <div class="post-box">
       <input type="file" id="reelFile" accept="video/*">
       <input id="reelCaption" placeholder="Reel caption...">
-      <button class="btn" onclick="createReel()">Upload Reel</button>
+      <button class="btn" id="reelBtn">Upload Reel</button>
     </div>
     <div id="reelsList"></div>
   </div>
-
-  <!-- CHAT -->
   <div id="chatTab" class="hidden">
     <div id="usersList"></div>
     <div id="chatBox" class="hidden" style="padding:10px">
-      <button onclick="backToUsers()" style="background:none;color:#fff;border:none;margin-bottom:10px">← Back</button>
+      <button id="backBtn" style="background:none;color:#fff;border:none;margin-bottom:10px">← Back</button>
       <h3 id="chatWith"></h3>
       <div id="messages" style="min-height:250px"></div>
       <input id="msgInput" placeholder="Type message...">
-      <button class="btn" onclick="sendMessage()">Send</button>
+      <button class="btn" id="sendBtn">Send</button>
     </div>
   </div>
-
-  <!-- PROFILE -->
   <div id="profileTab" class="hidden" style="padding:16px">
     <h2 id="profileName">My Profile</h2>
     <p id="profileEmail" style="color:#aaa;margin:6px 0"></p>
     <input type="file" id="avatarFile" accept="image/*">
-    <button class="btn" onclick="uploadAvatar()">Change Avatar</button>
+    <button class="btn" id="avatarBtn">Change Avatar</button>
     <div id="myPosts" style="margin-top:16px"></div>
   </div>
 </div>
-
 <script>
-// ==== REPLACE THESE 2 LINES ====
-NEXT_PUBLIC_SUPABASE_URL = https: //frmsoyxyslyeusgpmemf.supabase.co
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = sb_publishable_avzWn - NlOmdZC6JNCDraaA_oSanlw2y.   
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+document.getElementById('debug').innerText = "JS is WORKING ✅ Tap Create Account";
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL_HERE";
+const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+let supabaseClient = null;
+try {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e){ document.getElementById('authMsg').innerText = "Supabase error: " + e.message; }
 let currentUser = null;
 let chatUser = null;
 
-async function signUp(){
+document.getElementById('signupBtn').addEventListener('click', async ()=>{
+  alert("Button clicked! Trying signup...");
+  if(SUPABASE_URL.includes("PASTE")){ document.getElementById('authMsg').innerText="⚠️ You forgot to paste your Supabase URL and Publishable Key! Go to Supabase > Settings > API"; return; }
   const email=document.getElementById('email').value;
   const pass=document.getElementById('password').value;
   const username=document.getElementById('username').value;
@@ -112,8 +104,10 @@ async function signUp(){
     await supabaseClient.from('profiles').insert({id:data.user.id, username, full_name:username});
     document.getElementById('authMsg').innerText="Account created! Now tap Login.";
   }
-}
-async function signIn(){
+});
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  alert("Login button clicked!");
+  if(SUPABASE_URL.includes("PASTE")){ document.getElementById('authMsg').innerText="⚠️ Paste your Supabase keys first!"; return; }
   const email=document.getElementById('email').value;
   const pass=document.getElementById('password').value;
   const {data,error}=await supabaseClient.auth.signInWithPassword({email,password:pass});
@@ -122,9 +116,9 @@ async function signIn(){
   document.getElementById('auth').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   loadFeed(); loadReels(); loadUsers();
-}
-async function logout(){ await supabaseClient.auth.signOut(); location.reload(); }
-
+});
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); location.reload(); });
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
 function showTab(t){
   ['feedTab','reelsTab','chatTab','profileTab'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   document.getElementById(t+'Tab').classList.remove('hidden');
@@ -133,7 +127,7 @@ function showTab(t){
   if(t==='chat') loadUsers();
   if(t==='profile') loadProfile();
 }
-async function createPost(){
+document.getElementById('postBtn').addEventListener('click', async ()=>{
   const text=document.getElementById('postText').value;
   const file=document.getElementById('postFile').files[0];
   let image_url=null, video_url=null;
@@ -147,7 +141,7 @@ async function createPost(){
   const {error}=await supabaseClient.from('posts').insert({user_id:currentUser.id, content:text, image_url, video_url});
   if(error) return alert(error.message);
   document.getElementById('postText').value=''; loadFeed(); alert('Posted!');
-}
+});
 async function loadFeed(){
   const {data}=await supabaseClient.from('posts').select('*, profiles(username)').order('created_at',{ascending:false});
   const feed=document.getElementById('feed'); feed.innerHTML='';
@@ -165,7 +159,7 @@ async function likePost(id){
   await supabaseClient.from('posts').update({likes_count:(data?.likes_count||0)+1}).eq('id',id);
   loadFeed();
 }
-async function createReel(){
+document.getElementById('reelBtn').addEventListener('click', async ()=>{
   const file=document.getElementById('reelFile').files[0];
   const caption=document.getElementById('reelCaption').value;
   if(!file) return alert('Pick a video');
@@ -175,7 +169,7 @@ async function createReel(){
   const url=supabaseClient.storage.from('reels-media').getPublicUrl(name).data.publicUrl;
   await supabaseClient.from('reels').insert({user_id:currentUser.id, video_url:url, caption});
   loadReels(); alert('Reel uploaded!');
-}
+});
 async function loadReels(){
   const {data}=await supabaseClient.from('reels').select('*, profiles(username)').order('created_at',{ascending:false});
   const el=document.getElementById('reelsList'); el.innerHTML='';
@@ -200,7 +194,7 @@ async function openChat(u){
   document.getElementById('chatWith').innerText='@'+u.username;
   loadMessages();
 }
-function backToUsers(){ document.getElementById('usersList').classList.remove('hidden'); document.getElementById('chatBox').classList.add('hidden'); }
+document.getElementById('backBtn').addEventListener('click', ()=>{ document.getElementById('usersList').classList.remove('hidden'); document.getElementById('chatBox').classList.add('hidden'); });
 async function loadMessages(){
   const {data}=await supabaseClient.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${chatUser.id}),and(sender_id.eq.${chatUser.id},receiver_id.eq.${currentUser.id})`).order('created_at',{ascending:true});
   const el=document.getElementById('messages'); el.innerHTML='';
@@ -208,12 +202,12 @@ async function loadMessages(){
     const d=document.createElement('div'); d.className='msg '+(m.sender_id===currentUser.id?'me':'other'); d.innerText=m.content; el.appendChild(d);
   });
 }
-async function sendMessage(){
+document.getElementById('sendBtn').addEventListener('click', async ()=>{
   const content=document.getElementById('msgInput').value; if(!content) return;
   await supabaseClient.from('messages').insert({sender_id:currentUser.id, receiver_id:chatUser.id, content});
   document.getElementById('msgInput').value=''; loadMessages();
-}
-async function uploadAvatar(){
+});
+document.getElementById('avatarBtn').addEventListener('click', async ()=>{
   const file=document.getElementById('avatarFile').files[0]; if(!file) return alert('Pick image');
   const name=Date.now()+'-'+file.name;
   const {error}=await supabaseClient.storage.from('avatars').upload(name,file);
@@ -221,11 +215,11 @@ async function uploadAvatar(){
   const url=supabaseClient.storage.from('avatars').getPublicUrl(name).data.publicUrl;
   await supabaseClient.from('profiles').update({avatar_url:url}).eq('id',currentUser.id);
   alert('Avatar updated!'); loadProfile();
-}
+});
 async function loadProfile(){
   const {data}=await supabaseClient.from('profiles').select('*').eq('id',currentUser.id).single();
   if(data){ document.getElementById('profileName').innerText='@'+(data.username||'user'); document.getElementById('profileEmail').innerText=currentUser.email; }
 }
 </script>
 </body>
-</html>
+  </html>
